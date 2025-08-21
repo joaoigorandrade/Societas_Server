@@ -1,79 +1,105 @@
-const { db } = require('../../config/firebaseConfig');
+const db = require('../../config/firebaseConfig');
 
 const createUser = async (req, res) => {
   try {
-    const { uid, name, email, avatar_url } = req.body;
-    if (!uid) {
-      return res.status(400).send({ message: 'User ID (uid) is required in the request body.' });
-    }
-    const userRef = db.collection('users').doc(uid);
-    const doc = await userRef.get();
-    if (doc.exists) {
-      return res.status(409).send({ message: 'User already exists.' });
-    }
-    const newUser = {
+    const { name, avatar, enterprise } = req.body;
+    const userRef = await db.collection('users').add({
       name,
-      email,
-      created_at: new Date().toISOString(),
-    };
-    if (avatar_url) newUser.avatar_url = avatar_url;
-
-    await userRef.set(newUser);
-    res.status(201).send({ id: uid, ...newUser });
+      avatar,
+      enterprise,
+      createdAt: new Date().toISOString(),
+    });
+    res.status(201).send({ id: userRef.id });
   } catch (error) {
-    res.status(500).send({ message: 'Error creating user', error: error.message });
-  }
-};
-
-const deleteUser = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await db.collection('users').doc(id).delete();
-    res.status(200).send({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).send({ message: 'Error deleting user', error: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 const getAllUsers = async (req, res) => {
   try {
-    const snapshot = await db.collection('users').get();
-    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.status(200).json(users);
+    const usersSnapshot = await db.collection('users').get();
+    const users = [];
+    usersSnapshot.forEach((doc) => {
+      users.push({ id: doc.id, ...doc.data() });
+    });
+    res.status(200).send(users);
   } catch (error) {
-    res.status(500).send({ message: 'Error getting all users', error: error.message });
+    res.status(500).send(error.message);
   }
 };
 
-const getUser = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const userDoc = await db.collection('users').doc(id).get();
+    const { userId } = req.params;
+    const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
-      return res.status(404).send({ message: 'User not found' });
+      res.status(404).send('User not found');
+    } else {
+      res.status(200).send({ id: userDoc.id, ...userDoc.data() });
     }
-    res.status(200).json({ id: userDoc.id, ...userDoc.data() });
   } catch (error) {
-    res.status(500).send({ message: 'Error getting user', error: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const data = req.body;
-    await db.collection('users').doc(id).update(data);
-    const updatedDoc = await db.collection('users').doc(id).get();
-    res.status(200).send({ id: updatedDoc.id, ...updatedDoc.data() });
+    const { userId } = req.params;
+    const { name, avatar, enterprise } = req.body;
+    await db.collection('users').doc(userId).update({
+      name,
+      avatar,
+      enterprise,
+    });
+    res.status(200).send('User updated successfully');
   } catch (error) {
-    res.status(500).send({ message: 'Error updating user', error: error.message });
+    res.status(500).send(error.message);
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    await db.collection('users').doc(userId).delete();
+    res.status(200).send('User deleted successfully');
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+const getUserSettings = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (!userDoc.exists) {
+      res.status(404).send('User not found');
+    } else {
+      res.status(200).send(userDoc.data().settings);
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
+const updateUserSettings = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { settings } = req.body;
+    await db.collection('users').doc(userId).update({
+      settings,
+    });
+    res.status(200).send('User settings updated successfully');
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 };
 
 module.exports = {
   createUser,
-  deleteUser,
   getAllUsers,
-  getUser,
+  getUserById,
   updateUser,
+  deleteUser,
+  getUserSettings,
+  updateUserSettings,
 };

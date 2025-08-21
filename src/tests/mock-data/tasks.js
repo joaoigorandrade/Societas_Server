@@ -6,7 +6,7 @@ const generateMockTask = (userIds) => ({
   creator: faker.helpers.arrayElement(userIds),
   assigne: faker.helpers.arrayElement(userIds),
   weight: faker.number.int({ min: 1, max: 20 }),
-  related: faker.string.uuid(),
+  related: [faker.string.uuid()],
   result: faker.lorem.sentence(),
 });
 

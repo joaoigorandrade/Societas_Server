@@ -9,7 +9,7 @@ router.get('/', taskController.getAllTasks);
 router.post('/', taskController.createTask);
 
 // Get a single task by ID
-router.get('/:taskId', taskController.getTask);
+router.get('/:taskId', taskController.getTaskById);
 
 // Update a task by ID
 router.put('/:taskId', taskController.updateTask);

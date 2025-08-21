@@ -1,47 +1,44 @@
-const { db } = require('../../config/firebaseConfig');
+const db = require('../../config/firebaseConfig');
 
 const createMessage = async (req, res) => {
   try {
-    const { chatId } = req.params;
-    const { sender_id, content } = req.body;
-    const newMessage = {
-      sender_id,
+    const { userId, chatId } = req.params;
+    const { sender, content, status } = req.body;
+
+    // 1. Create the new message
+    const messageRef = await db.collection('users').doc(userId).collection('chats').doc(chatId).collection('messages').add({
+      sender,
       content,
-      timestamp: new Date().toISOString(),
-    };
-    const docRef = await db.collection('chats').doc(chatId).collection('messages').add(newMessage);
-    res.status(201).send({ id: docRef.id, ...newMessage });
+      status,
+      time: new Date().toISOString(),
+    });
+
+    // 2. Update the last_message in the parent chat document
+    await db.collection('users').doc(userId).collection('chats').doc(chatId).update({
+      last_message: content,
+    });
+
+    res.status(201).send({ id: messageRef.id });
   } catch (error) {
-    res.status(500).send({ message: 'Error creating message', error: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 const getAllMessages = async (req, res) => {
   try {
-    const { chatId } = req.params;
-    const snapshot = await db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp').get();
-    const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.status(200).json(messages);
+    const { userId, chatId } = req.params;
+    const messagesSnapshot = await db.collection('users').doc(userId).collection('chats').doc(chatId).collection('messages').get();
+    const messages = [];
+    messagesSnapshot.forEach((doc) => {
+      messages.push({ id: doc.id, ...doc.data() });
+    });
+    res.status(200).send(messages);
   } catch (error) {
-    res.status(500).send({ message: 'Error getting all messages', error: error.message });
-  }
-};
-
-const getMessage = async (req, res) => {
-  try {
-    const { chatId, messageId } = req.params;
-    const messageDoc = await db.collection('chats').doc(chatId).collection('messages').doc(messageId).get();
-    if (!messageDoc.exists) {
-      return res.status(404).send({ message: 'Message not found' });
-    }
-    res.status(200).json({ id: messageDoc.id, ...messageDoc.data() });
-  } catch (error) {
-    res.status(500).send({ message: 'Error getting message', error: error.message });
+    res.status(500).send(error.message);
   }
 };
 
 module.exports = {
   createMessage,
   getAllMessages,
-  getMessage,
 };

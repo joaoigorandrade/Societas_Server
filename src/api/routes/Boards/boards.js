@@ -9,7 +9,7 @@ router.use('/:boardId/tasks', taskRoutes);
 // Board routes
 router.get('/', boardController.getAllBoards);
 router.post('/', boardController.createBoard);
-router.get('/:boardId', boardController.getBoard);
+router.get('/:boardId', boardController.getBoardById);
 router.put('/:boardId', boardController.updateBoard);
 router.delete('/:boardId', boardController.deleteBoard);
 

@@ -9,6 +9,6 @@ router.get('/', messageController.getAllMessages);
 router.post('/', messageController.createMessage);
 
 // Get a single message by ID
-router.get('/:messageId', messageController.getMessage);
+
 
 module.exports = router;

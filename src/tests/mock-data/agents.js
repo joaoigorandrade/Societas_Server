@@ -7,7 +7,7 @@ const generateMockAgent = () => ({
   },
   board: faker.string.uuid(),
   tasks: [faker.string.uuid(), faker.string.uuid()],
-  sub_agents: [faker.string.uuid()],
+  subAgents: [faker.string.uuid()],
   documents: [faker.string.uuid(), faker.string.uuid()],
   memory: faker.helpers.arrayElement(['long-term', 'short-term']),
   status: faker.helpers.arrayElement(['active', 'idle', 'offline']),

@@ -73,6 +73,7 @@
 ## Delivery Format & Proof of Implementation
 - Always return **only** the requested code or file structure.
 - Avoid unnecessary explanations or step-by-step guides.
+- When finished the request update the README.md with the changes.
 - **Every feature, modification, or bug fix must be accompanied by a working function that demonstrates its real-world application.** This means:
   - If a feature involves creating a user, provide a function like `createUser(userData)` that actually writes a new document to the Firestore `users` collection.
   - If a feature involves AI, provide a function like `getCompletion(prompt)` that makes a real call to the Gemini API and returns the result.
