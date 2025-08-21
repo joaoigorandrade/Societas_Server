@@ -1,4 +1,4 @@
-const db = require('../../config/firebaseConfig');
+const {db}= require('../../config/firebaseConfig');
 
 const createChat = async (req, res) => {
   try {
@@ -64,12 +64,18 @@ const getChatWithAgent = async (req, res) => {
       return res.status(404).send('No chat found with this agent.');
     }
 
-    const chats = [];
-    snapshot.forEach(doc => {
-      chats.push({ id: doc.id, ...doc.data() });
+    const chatDoc = snapshot.docs[0];
+    const messagesSnapshot = await chatDoc.ref.collection('messages').orderBy('time', 'asc').get();
+
+    const messages = messagesSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        text: data.content,
+        author: data.sender,
+      };
     });
 
-    res.status(200).send(chats[0]);
+    res.status(200).send(messages);
   } catch (error) {
     res.status(500).send(error.message);
   }

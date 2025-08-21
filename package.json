@@ -7,7 +7,7 @@
     "test": "jest",
     "seed": "node src/tests/seed.js",
     "start": "node server.js",
-    "run": "nodemon server.js"
+    "unstop": "nodemon server.js"
   },
   "keywords": [],
   "author": "",

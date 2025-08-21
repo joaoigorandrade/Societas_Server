@@ -1,11 +1,16 @@
 const express = require('express');
+const logger = require('./api/middleware/logger');
 const app = express();
 app.use(express.json());
+app.use(logger);
 
 const homeRoutes = require('./api/routes/Home/home');
 const usersRoutes = require('./api/routes/Users/users');
+const errorHandler = require('./api/middleware/errorHandler');
 
 app.use('/home', homeRoutes);
 app.use('/api/users', usersRoutes);
+
+app.use(errorHandler);
 
 module.exports = app;
