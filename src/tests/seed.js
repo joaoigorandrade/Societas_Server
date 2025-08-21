@@ -7,12 +7,12 @@ const generateMockChat = require('./mock-data/chats');
 const generateMockMessage = require('./mock-data/messages');
 
 // --- Configuration ---
-const NUM_USERS = 5;
-const AGENTS_PER_USER = 2;
-const BOARDS_PER_USER = 2;
-const TASKS_PER_BOARD = 3;
-const CHATS_PER_USER = 2;
-const MESSAGES_PER_CHAT = 5;
+const NUM_USERS = 1;
+const AGENTS_PER_USER = 3;
+const BOARDS_PER_USER = 1;
+const TASKS_PER_BOARD = 5;
+const CHATS_PER_USER = 3;
+const MESSAGES_PER_CHAT = 10;
 // -------------------
 
 const seedDatabase = async () => {
@@ -35,12 +35,14 @@ const seedDatabase = async () => {
       console.log(`\n--- Populating sub-collections for user ${userId} ---`);
       const mainBatch = db.batch();
       const chatRefs = [];
+      const agentRefs = [];
 
       // Create Agents
       for (let i = 0; i < AGENTS_PER_USER; i++) {
         const agentData = generateMockAgent();
         const agentRef = db.collection('users').doc(userId).collection('agents').doc();
         mainBatch.set(agentRef, agentData);
+        agentRefs.push(agentRef);
       }
 
       // Create Boards and their Tasks
@@ -58,8 +60,8 @@ const seedDatabase = async () => {
 
       // Create Chats (without messages)
       for (let i = 0; i < CHATS_PER_USER; i++) {
-        const otherUserIds = userIds.filter(id => id !== userId);
-        const participants = [userId, otherUserIds[Math.floor(Math.random() * otherUserIds.length)]];
+        const agentId = agentRefs[i % AGENTS_PER_USER].id;
+        const participants = [userId, agentId];
         const chatData = generateMockChat(participants);
         const chatRef = db.collection('users').doc(userId).collection('chats').doc();
         mainBatch.set(chatRef, chatData);

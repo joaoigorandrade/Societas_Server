@@ -69,7 +69,6 @@ const getChatWithAgent = async (req, res) => {
       chats.push({ id: doc.id, ...doc.data() });
     });
 
-    // Assuming one-on-one chat, return the first one found.
     res.status(200).send(chats[0]);
   } catch (error) {
     res.status(500).send(error.message);
