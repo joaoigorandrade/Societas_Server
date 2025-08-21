@@ -1,4 +1,4 @@
-const { db } = require('config/firebaseConfig');
+const { db } = require('../../config/firebaseConfig');
 
 const createBoard = async (req, res) => {
   try {

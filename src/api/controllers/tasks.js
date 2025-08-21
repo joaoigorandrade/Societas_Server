@@ -1,4 +1,4 @@
-const { db } = require('config/firebaseConfig');
+const { db } = require('../../config/firebaseConfig');
 
 const createTask = async (req, res) => {
   console.log('Request body in createTask:', req.body);
