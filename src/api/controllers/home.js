@@ -14,7 +14,8 @@ const getHomeScreen = async (req, res) => {
       const agentData = doc.data();
       return {
         name: agentData.name || 'Unnamed Agent',
-        department: agentData.description || 'No Department'
+        department: agentData.description || 'No Department',
+        id: doc.id
       };
     });
 
