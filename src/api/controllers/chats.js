@@ -75,7 +75,11 @@ const getChatWithAgent = async (req, res) => {
       };
     });
 
-    res.status(200).send(messages);
+    const chat = {
+      chatId: chatDoc.id,
+      messages: messages
+    }
+    res.status(200).send(chat);
   } catch (error) {
     res.status(500).send(error.message);
   }

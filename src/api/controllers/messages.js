@@ -3,22 +3,21 @@ const {db} = require('../../config/firebaseConfig');
 const createMessage = async (req, res) => {
   try {
     const { userId, chatId } = req.params;
-    const { sender, content, status } = req.body;
+    const { message } = req.body;
 
     // 1. Create the new message
     const messageRef = await db.collection('users').doc(userId).collection('chats').doc(chatId).collection('messages').add({
-      sender,
-      content,
-      status,
+      sender: userId,
+      content: message,
       time: new Date().toISOString(),
     });
 
     // 2. Update the last_message in the parent chat document
     await db.collection('users').doc(userId).collection('chats').doc(chatId).update({
-      last_message: content,
+      last_message: messageRef,
     });
 
-    res.status(201).send({ id: messageRef.id });
+    res.status(201).send({ status: 201 });
   } catch (error) {
     res.status(500).send(error.message);
   }
