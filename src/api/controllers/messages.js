@@ -1,27 +1,63 @@
 const {db} = require('../../config/firebaseConfig');
+const { GoogleGenAI } = require("@google/genai");
 
-const createMessage = async (req, res) => {
+const createMessage = async (req, res, next) => {
   try {
     const { userId, chatId } = req.params;
-    const { message } = req.body;
+    const { message, agentId } = req.body;
 
-    // 1. Create the new message
-    const messageRef = await db.collection('users').doc(userId).collection('chats').doc(chatId).collection('messages').add({
+    if (!message || !agentId) {
+      const err = new Error('Bad Request: message and agentId are required.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const aiResponse = await getAiResponse(message);
+
+    const batch = db.batch();
+    const chatRef = db.collection('users').doc(userId).collection('chats').doc(chatId);
+    const messagesRef = chatRef.collection('messages');
+
+    const userMessageRef = messagesRef.doc();
+    batch.set(userMessageRef, {
       sender: userId,
       content: message,
       time: new Date().toISOString(),
     });
 
-    // 2. Update the last_message in the parent chat document
-    await db.collection('users').doc(userId).collection('chats').doc(chatId).update({
-      last_message: messageRef,
+    const aiMessageRef = messagesRef.doc();
+    batch.set(aiMessageRef, {
+      sender: agentId,
+      content: aiResponse,
+      time: new Date().toISOString(),
     });
 
-    res.status(201).send({ status: 201 });
+    batch.update(chatRef, {
+      last_message: aiResponse,
+    });
+
+    await batch.commit();
+
+    res.status(201).send({
+      userMessageId: userMessageRef.id,
+      aiMessageId: aiMessageRef.id,
+    });
   } catch (error) {
-    res.status(500).send(error.message);
+    next(error);
   }
 };
+
+async function getAiResponse(contents) {
+  const genAI = new GoogleGenAI({});
+  const response = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: contents,
+    config: {
+      systemInstruction: "You are a CFO of a enterprise named Societas, you are responding in the enterprise chat dont be to much detailed",
+    },
+  });
+  return response.text;
+}
 
 const getAllMessages = async (req, res) => {
   try {
