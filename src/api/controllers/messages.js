@@ -12,8 +12,6 @@ const createMessage = async (req, res, next) => {
       throw err;
     }
 
-    const aiResponse = await getAiResponse(message);
-
     const batch = db.batch();
     const chatRef = db.collection('users').doc(userId).collection('chats').doc(chatId);
     const messagesRef = chatRef.collection('messages');
@@ -24,6 +22,9 @@ const createMessage = async (req, res, next) => {
       content: message,
       time: new Date().toISOString(),
     });
+
+    const history = await getHistory(userId, agentId, chatId);
+    const aiResponse = await getAiResponse(history, message);
 
     const aiMessageRef = messagesRef.doc();
     batch.set(aiMessageRef, {
@@ -39,37 +40,82 @@ const createMessage = async (req, res, next) => {
     await batch.commit();
 
     res.status(201).send({
+      status: 201,
       userMessageId: userMessageRef.id,
       aiMessageId: aiMessageRef.id,
     });
   } catch (error) {
+    console.log(error)
     next(error);
   }
 };
 
-async function getAiResponse(contents) {
+async function getAiResponse(history, contents) {
   const genAI = new GoogleGenAI({});
-  const response = await genAI.models.generateContent({
+  const chat = genAI.chats.create({
     model: "gemini-2.5-flash",
-    contents: contents,
     config: {
+      thinkingConfig: 0,
       systemInstruction: "You are a CFO of a enterprise named Societas, you are responding in the enterprise chat dont be to much detailed",
     },
+    history
+  });
+  const response = await chat.sendMessage({
+    message: contents,
   });
   return response.text;
 }
 
-const getAllMessages = async (req, res) => {
+async function getHistory(userId, agentId, chatId) {
+    const chatRef = db.collection('users').doc(userId).collection('chats').doc(chatId);
+    const chatDoc = await chatRef.get();
+
+    if (!chatDoc.exists) {
+      const err = new Error('Chat not found.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    if (!agentId) {
+      const err = new Error('Could not identify agent in this chat.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const messagesSnapshot = await chatRef.collection('messages').orderBy('time', 'asc').get();
+
+    const history = messagesSnapshot.docs.map(doc => {
+      const message = doc.data();
+      const role = message.sender === userId ? 'user' : 'model';
+      return {
+        role: role,
+        parts: [{ text: message.content }],
+      };
+    });
+
+    return history
+};
+
+const getAllMessages = async (req, res, next) => {
   try {
     const { userId, chatId } = req.params;
-    const messagesSnapshot = await db.collection('users').doc(userId).collection('chats').doc(chatId).collection('messages').get();
-    const messages = [];
-    messagesSnapshot.forEach((doc) => {
-      messages.push({ id: doc.id, ...doc.data() });
-    });
-    res.status(200).send(messages);
+    
+    const chatRef = db.collection('users').doc(userId).collection('chats').doc(chatId);
+    const chatDoc = await chatRef.get();
+
+    if (!chatDoc.exists) {
+      const err = new Error('Chat not found.');
+      err.statusCode = 404;
+      throw err;
+    }
+    
+    const participants = chatDoc.data().participants;
+    const agentId = participants.find(p => p !== userId);
+
+    const history = await getHistory(userId, agentId, chatId);
+    res.status(200).send({ history });
   } catch (error) {
-    res.status(500).send(error.message);
+    next(error);
   }
 };
 
