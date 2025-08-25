@@ -14,7 +14,7 @@ This is the backend server for Societas, a collaborative platform that leverages
 
 *   **Message Creation Optimization (2025-08-23):**
     *   Refactored the `createMessage` controller to use a single atomic batch write to Firestore. This ensures that creating a user's message, generating and storing the AI's response, and updating the chat's `last_message` all succeed or fail together, improving data consistency.
-    *   Updated the Gemini API call to use the correct model (`gemini-1.5-flash`) and align with the latest `@google/genai` SDK practices for better performance and reliability.
+    *   Updated the Gemini API call to use the correct model (`gemini-2.5-flash`) and align with the latest `@google/genai` SDK practices for better performance and reliability.
     *   Enhanced error handling to use the centralized middleware, following project guidelines.
     *   Improved input validation for creating messages.
 

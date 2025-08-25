@@ -1,5 +1,5 @@
 const {db} = require('../../config/firebaseConfig');
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenAI, HarmCategory, HarmBlockThreshold } = require("@google/genai");
 
 const createMessage = async (req, res, next) => {
   try {
@@ -52,11 +52,40 @@ const createMessage = async (req, res, next) => {
 
 async function getAiResponse(history, contents) {
   const genAI = new GoogleGenAI({});
+
+  const generationConfig = {
+    temperature: 0.9,
+    topK: 1,
+    topP: 1,
+    maxOutputTokens: 8192,
+  };
+
+  const safetySettings = [
+    {
+      category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+  ];
+
   const chat = genAI.chats.create({
     model: "gemini-2.5-flash",
     config: {
       thinkingConfig: 0,
       systemInstruction: "You are a CFO of a enterprise named Societas, you are responding in the enterprise chat dont be to much detailed",
+      generationConfig,
+      safetySettings,
     },
     history
   });
