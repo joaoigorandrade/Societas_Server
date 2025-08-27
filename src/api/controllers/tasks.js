@@ -2,7 +2,8 @@ const {db} = require('../../config/firebaseConfig');
 
 const createTask = async (req, res) => {
   try {
-    const { userId, boardId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId } = req.params;
     const { creator, assignee, description, status, weight, related, result } = req.body;
     const taskRef = await db.collection('users').doc(userId).collection('boards').doc(boardId).collection('tasks').add({
       creator,
@@ -22,7 +23,8 @@ const createTask = async (req, res) => {
 
 const getAllTasks = async (req, res) => {
   try {
-    const { userId, boardId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId } = req.params;
     const tasksSnapshot = await db.collection('users').doc(userId).collection('boards').doc(boardId).collection('tasks').get();
     const tasks = [];
     tasksSnapshot.forEach((doc) => {
@@ -36,7 +38,8 @@ const getAllTasks = async (req, res) => {
 
 const getTaskById = async (req, res) => {
   try {
-    const { userId, boardId, taskId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId, taskId } = req.params;
     const taskDoc = await db.collection('users').doc(userId).collection('boards').doc(boardId).collection('tasks').doc(taskId).get();
     if (!taskDoc.exists) {
       res.status(404).send('Task not found');
@@ -50,7 +53,8 @@ const getTaskById = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
-    const { userId, boardId, taskId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId, taskId } = req.params;
     const { creator, assignee, description, status, weight, related, result } = req.body;
     await db.collection('users').doc(userId).collection('boards').doc(boardId).collection('tasks').doc(taskId).update({
       creator,
@@ -69,7 +73,8 @@ const updateTask = async (req, res) => {
 
 const deleteTask = async (req, res) => {
   try {
-    const { userId, boardId, taskId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId, taskId } = req.params;
     await db.collection('users').doc(userId).collection('boards').doc(boardId).collection('tasks').doc(taskId).delete();
     res.status(200).send('Task deleted successfully');
   } catch (error) {

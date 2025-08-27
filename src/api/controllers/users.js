@@ -30,8 +30,8 @@ const getAllUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const userDoc = await db.collection('users').doc(userId).get();
+    const { id } = req.params;
+    const userDoc = await db.collection('users').doc(id).get();
     if (!userDoc.exists) {
       res.status(404).send('User not found');
     } else {
@@ -44,9 +44,9 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { id } = req.params;
     const { name, avatar, enterprise } = req.body;
-    await db.collection('users').doc(userId).update({
+    await db.collection('users').doc(id).update({
       name,
       avatar,
       enterprise,
@@ -59,7 +59,7 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     await db.collection('users').doc(userId).delete();
     res.status(200).send('User deleted successfully');
   } catch (error) {
@@ -69,7 +69,7 @@ const deleteUser = async (req, res) => {
 
 const getUserSettings = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
       res.status(404).send('User not found');
@@ -83,7 +83,7 @@ const getUserSettings = async (req, res) => {
 
 const updateUserSettings = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const { settings } = req.body;
     await db.collection('users').doc(userId).update({
       settings,

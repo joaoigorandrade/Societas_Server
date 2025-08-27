@@ -2,7 +2,7 @@ const {db} = require('../../config/firebaseConfig');
 
 const createBoard = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const { description, summary, finish_pc } = req.body;
     const boardRef = await db.collection('users').doc(userId).collection('boards').add({
       description,
@@ -18,7 +18,7 @@ const createBoard = async (req, res) => {
 
 const getAllBoards = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const boardsSnapshot = await db.collection('users').doc(userId).collection('boards').get();
     const boards = [];
     boardsSnapshot.forEach((doc) => {
@@ -32,7 +32,8 @@ const getAllBoards = async (req, res) => {
 
 const getBoardById = async (req, res) => {
   try {
-    const { userId, boardId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId } = req.params;
     const boardDoc = await db.collection('users').doc(userId).collection('boards').doc(boardId).get();
     if (!boardDoc.exists) {
       res.status(404).send('Board not found');
@@ -46,7 +47,8 @@ const getBoardById = async (req, res) => {
 
 const updateBoard = async (req, res) => {
   try {
-    const { userId, boardId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId } = req.params;
     const { description, summary, finish_pc } = req.body;
     await db.collection('users').doc(userId).collection('boards').doc(boardId).update({
       description,
@@ -61,7 +63,8 @@ const updateBoard = async (req, res) => {
 
 const deleteBoard = async (req, res) => {
   try {
-    const { userId, boardId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { boardId } = req.params;
     await db.collection('users').doc(userId).collection('boards').doc(boardId).delete();
     res.status(200).send('Board deleted successfully');
   } catch (error) {

@@ -10,19 +10,19 @@ router.get('/', userController.getAllUsers);
 router.post('/', userController.createUser);
 router.get('/:id', userController.getUserById);
 router.put('/:id', userController.updateUser);
-router.delete('/:userId', userController.deleteUser);
+router.delete('/', userController.deleteUser);
 
 // User settings routes
-router.get('/:userId/settings', userController.getUserSettings);
-router.put('/:userId/settings', userController.updateUserSettings);
+router.get('/settings', userController.getUserSettings);
+router.put('/settings', userController.updateUserSettings);
 
 // Agent routes
-router.use('/:userId/agents', agentRoutes);
+router.use('/agents', agentRoutes);
 
 // Chat routes
-router.use('/:userId/chats', chatRoutes);
+router.use('/chats', chatRoutes);
 
 // Board routes
-router.use('/:userId/boards', boardRoutes);
+router.use('/boards', boardRoutes);
 
 module.exports = router;

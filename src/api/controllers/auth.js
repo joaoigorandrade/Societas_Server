@@ -155,6 +155,7 @@ const signIn = async (req, res) => {
         const { idToken, refreshToken, localId, email: userEmail } = signInResponse.data;
 
         // Get user data from Firestore
+        console.log(localId)
         const userDoc = await db.collection('users').doc(localId).get();
 
         if (!userDoc.exists) {

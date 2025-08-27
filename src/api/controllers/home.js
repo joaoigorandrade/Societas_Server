@@ -2,7 +2,7 @@ const { db } = require('../../config/firebaseConfig');
 
 const getHomeScreen = async (req, res) => {
   try {
-    const userId = "6qDU3re3ejbpIdman0WL";
+    const userId = req.headers['x-user-id'];
 
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {

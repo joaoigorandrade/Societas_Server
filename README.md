@@ -12,6 +12,9 @@ This is the backend server for Societas, a collaborative platform that leverages
 
 ## Recent Changes
 
+*   **User ID from Header (2025-08-26):**
+    *   All routes now expect the `userID` to be passed in the `x-user-id` header of the request, instead of a URL parameter.
+    *   Added a middleware to validate the presence of the `x-user-id` header in all protected routes.
 *   **Message Creation Optimization (2025-08-23):**
     *   Refactored the `createMessage` controller to use a single atomic batch write to Firestore. This ensures that creating a user's message, generating and storing the AI's response, and updating the chat's `last_message` all succeed or fail together, improving data consistency.
     *   Updated the Gemini API call to use the correct model (`gemini-2.5-flash`) and align with the latest `@google/genai` SDK practices for better performance and reliability.
@@ -31,6 +34,8 @@ This is the backend server for Societas, a collaborative platform that leverages
 
 ## API Endpoints
 
+All endpoints that require a `userId` now expect it to be passed in the `x-user-id` header.
+
 ### Home
 
 *   `GET /home`: Returns a welcome message.
@@ -39,48 +44,48 @@ This is the backend server for Societas, a collaborative platform that leverages
 
 *   `POST /api/users`: Creates a new user.
 *   `GET /api/users`: Retrieves all users.
-*   `GET /api/users/:userId`: Retrieves a specific user.
-*   `PUT /api/users/:userId`: Updates a specific user.
-*   `DELETE /api/users/:userId`: Deletes a specific user.
-*   `GET /api/users/:userId/settings`: Retrieves the settings for a specific user.
-*   `PUT /api/users/:userId/settings`: Updates the settings for a specific user.
+*   `GET /api/users/:id`: Retrieves a specific user.
+*   `PUT /api/users/:id`: Updates a specific user.
+*   `DELETE /api/users`: Deletes a specific user.
+*   `GET /api/users/settings`: Retrieves the settings for a specific user.
+*   `PUT /api/users/settings`: Updates the settings for a specific user.
 
 ### Agents
 
-*   `POST /api/users/:userId/agents`: Creates a new AI agent for a user.
-*   `GET /api/users/:userId/agents`: Retrieves all AI agents for a user.
-*   `GET /api/users/:userId/agents/:agentId`: Retrieves a specific AI agent for a user.
-*   `PUT /api/users/:userId/agents/:agentId`: Updates a specific AI agent for a user.
-*   `DELETE /api/users/:userId/agents/:agentId`: Deletes a specific AI agent for a user.
+*   `POST /api/users/agents`: Creates a new AI agent for a user.
+*   `GET /api/users/agents`: Retrieves all AI agents for a user.
+*   `GET /api/users/agents/:agentId`: Retrieves a specific AI agent for a user.
+*   `PUT /api/users/agents/:agentId`: Updates a specific AI agent for a user.
+*   `DELETE /api/users/agents/:agentId`: Deletes a specific AI agent for a user.
 
 ### Boards
 
-*   `POST /api/users/:userId/boards`: Creates a new project board for a user.
-*   `GET /api/users/:userId/boards`: Retrieves all project boards for a user.
-*   `GET /api/users/:userId/boards/:boardId`: Retrieves a specific project board for a user.
-*   `PUT /api/users/:userId/boards/:boardId`: Updates a specific project board for a user.
-*   `DELETE /api/users/:userId/boards/:boardId`: Deletes a specific project board for a user.
+*   `POST /api/users/boards`: Creates a new project board for a user.
+*   `GET /api/users/boards`: Retrieves all project boards for a user.
+*   `GET /api/users/boards/:boardId`: Retrieves a specific project board for a user.
+*   `PUT /api/users/boards/:boardId`: Updates a specific project board for a user.
+*   `DELETE /api/users/boards/:boardId`: Deletes a specific project board for a user.
 
 ### Tasks
 
-*   `POST /api/users/:userId/boards/:boardId/tasks`: Creates a new task within a project board.
-*   `GET /api/users/:userId/boards/:boardId/tasks`: Retrieves all tasks from a specific project board.
-*   `GET /api/users/:userId/boards/:boardId/tasks/:taskId`: Retrieves a specific task from a project board.
-*   `PUT /api/users/:userId/boards/:boardId/tasks/:taskId`: Updates a specific task from a project board.
-*   `DELETE /api/users/:userId/boards/:boardId/tasks/:taskId`: Deletes a specific task from a project board.
+*   `POST /api/users/boards/:boardId/tasks`: Creates a new task within a project board.
+*   `GET /api/users/boards/:boardId/tasks`: Retrieves all tasks from a specific project board.
+*   `GET /api/users/boards/:boardId/tasks/:taskId`: Retrieves a specific task from a project board.
+*   `PUT /api/users/boards/:boardId/tasks/:taskId`: Updates a specific task from a project board.
+*   `DELETE /api/users/boards/:boardId/tasks/:taskId`: Deletes a specific task from a project board.
 
 ### Chats
 
-*   `POST /api/users/:userId/chats`: Creates a new chat room for a user.
-*   `GET /api/users/:userId/chats`: Retrieves all chat rooms for a user.
-*   `GET /api/users/:userId/chats/:chatId`: Retrieves a specific chat room for a user.
-*   `GET /api/users/:userId/chats/with/:agentId`: Retrieves a chat with a specific agent.
-*   `DELETE /api/users/:userId/chats/:chatId`: Deletes a specific chat room for a user.
+*   `POST /api/users/chats`: Creates a new chat room for a user.
+*   `GET /api/users/chats`: Retrieves all chat rooms for a user.
+*   `GET /api/users/chats/:chatId`: Retrieves a specific chat room for a user.
+*   `GET /api/users/chats/with/:agentId`: Retrieves a chat with a specific agent.
+*   `DELETE /api/users/chats/:chatId`: Deletes a specific chat room for a user.
 
 ### Messages
 
-*   `POST /api/users/:userId/chats/:chatId/messages`: Sends a new message to a chat room.
-*   `GET /api/users/:userId/chats/:chatId/messages`: Retrieves all messages from a specific chat room.
+*   `POST /api/users/chats/:chatId/messages`: Sends a new message to a chat room.
+*   `GET /api/users/chats/:chatId/messages`: Retrieves all messages from a specific chat room.
 
 ## Getting Started
 

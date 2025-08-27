@@ -2,7 +2,7 @@ const {db}= require('../../config/firebaseConfig');
 
 const createChat = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const { participants, summary, last_message } = req.body;
     const chatRef = await db.collection('users').doc(userId).collection('chats').add({
       participants,
@@ -18,7 +18,7 @@ const createChat = async (req, res) => {
 
 const getAllChats = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.headers['x-user-id'];
     const chatsSnapshot = await db.collection('users').doc(userId).collection('chats').get();
     const chats = [];
     chatsSnapshot.forEach((doc) => {
@@ -32,7 +32,8 @@ const getAllChats = async (req, res) => {
 
 const getChatById = async (req, res) => {
   try {
-    const { userId, chatId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { chatId } = req.params;
     const chatDoc = await db.collection('users').doc(userId).collection('chats').doc(chatId).get();
     if (!chatDoc.exists) {
       res.status(404).send('Chat not found');
@@ -46,7 +47,8 @@ const getChatById = async (req, res) => {
 
 const deleteChat = async (req, res) => {
   try {
-    const { userId, chatId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { chatId } = req.params;
     await db.collection('users').doc(userId).collection('chats').doc(chatId).delete();
     res.status(200).send('Chat deleted successfully');
   } catch (error) {
@@ -56,7 +58,8 @@ const deleteChat = async (req, res) => {
 
 const getChatWithAgent = async (req, res) => {
   try {
-    const { userId, agentId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { agentId } = req.params;
     const chatsRef = db.collection('users').doc(userId).collection('chats');
     const snapshot = await chatsRef.where('participants', 'array-contains', agentId).get();
 

@@ -3,7 +3,8 @@ const { GoogleGenAI, HarmCategory, HarmBlockThreshold } = require("@google/genai
 
 const createMessage = async (req, res, next) => {
   try {
-    const { userId, chatId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { chatId } = req.params;
     const { message, agentId } = req.body;
 
     if (!message || !agentId) {
@@ -127,7 +128,8 @@ async function getHistory(userId, agentId, chatId) {
 
 const getAllMessages = async (req, res, next) => {
   try {
-    const { userId, chatId } = req.params;
+    const userId = req.headers['x-user-id'];
+    const { chatId } = req.params;
     
     const chatRef = db.collection('users').doc(userId).collection('chats').doc(chatId);
     const chatDoc = await chatRef.get();
